@@ -15,9 +15,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 
 import java.net.http.HttpHeaders;
+import java.util.ArrayList;
 import java.util.List;
 
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:3005")
 @RestController
 @RequestMapping("api/")
 public class UserController {
@@ -37,11 +38,12 @@ public class UserController {
     @Autowired
     private PasswordEncoder encoder;
 
-    public boolean isAdmin(String token){
+    public boolean isAdmin(String token) {
         String username = jwtUtil.extractUsername(token.substring(7));
         User user = userRepository.findByUsername(username);
-        return user.getRole().equals("ROLE_ADMIN")? true: false;
+        return user.getRole().equals("ROLE_ADMIN") ? true : false;
     }
+
 
     @GetMapping("/index")
     public String index() {
@@ -50,8 +52,14 @@ public class UserController {
 
 
     @GetMapping("/users")
-    public List<User> getAllUsers(@RequestHeader(name = "Authorization") String token){
-        return userRepository.findAll();
+    public ResponseEntity<List<User>> getAllUsers(@RequestHeader(name = "Authorization") String token) {
+        List<User> users = new ArrayList<>();
+        if(isAdmin(token)) {
+            users = userRepository.findAll();
+            return new ResponseEntity<>(users,HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>(users,HttpStatus.OK);
+        }
     }
 
 
@@ -65,6 +73,19 @@ public class UserController {
             throw new Exception("invalid");
         }
         return jwtUtil.generateToken(request.getUsername());
+    }
+
+    @PostMapping("/admin")
+    public ResponseEntity<String> authenticateAdmin(@RequestBody User user) {
+        User currentUser = userRepository.findByUsername(user.getUsername());
+        if (currentUser != null && encoder.matches(user.getPassword(), currentUser.getPassword()) && currentUser.getRole().equals("ROLE_ADMIN")) {
+            authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(currentUser.getUsername(), user.getPassword()));
+            return new ResponseEntity<>(jwtUtil.generateToken(currentUser.getUsername()),HttpStatus.OK);
+        } else {
+
+            return new ResponseEntity<>("Wrong credentials",HttpStatus.OK);
+        }
     }
 
     @PostMapping("/register")
@@ -97,8 +118,8 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable long id,@RequestBody User user,@RequestHeader(name ="Authorization") String token){
-        if(this.isAdmin(token)){
+    public ResponseEntity<String> updateUser(@PathVariable long id, @RequestBody User user, @RequestHeader(name = "Authorization") String token) {
+        if (this.isAdmin(token)) {
             User modifiedUser = userRepository.findById(id).orElseThrow();
             modifiedUser.setEmail(user.getEmail());
             modifiedUser.setUsername(user.getUsername());
@@ -107,8 +128,8 @@ public class UserController {
             modifiedUser.setPassword(encoder.encode(user.getPassword()));
             userRepository.save(modifiedUser);
             return new ResponseEntity<>("Successfully modified user", HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>("You are not an admin, so you cannot modify existing data", HttpStatus.CONFLICT);
+        } else {
+            return new ResponseEntity<>("You are not an admin, so you cannot modify existing data", HttpStatus.OK);
         }
     }
 }
