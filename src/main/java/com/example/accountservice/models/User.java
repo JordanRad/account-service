@@ -1,13 +1,6 @@
 package com.example.accountservice.models;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -16,37 +9,35 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
     private long id;
 
-    @Column(name="firstName", length=50)
     private String firstName;
 
-    @Column(name="lastName", length=50)
     private String lastName;
 
-    @Column(name="email")
+    @Column(unique = true)
     private String email;
 
-    @Column(name="password")
     private String password;
 
 
-    @Column(name="username",unique = true)
-    private String username;
-
+//    private String username;
 
     private String role;
 
-    public String getUsername() {
-        return username;
-    }
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    private Address address;
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+//    public String getUsername() {
+//        return username;
+//    }
+//
+//    public void setUsername(String username) {
+//        this.username = username;
+//    }
 
-    public User(){
+    public User() {
     }
 
     public User(String email, String password) {
@@ -54,8 +45,8 @@ public class User {
         this.password = password;
     }
 
-    public User(String username,String firstName, String lastName, String email, String password) {
-        this.username = username;
+    public User(String email,String firstName, String lastName, String password) {
+        this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -101,7 +92,7 @@ public class User {
 
     public void setPassword(String password) {
 
-        this.password= password;
+        this.password = password;
     }
 
     public String getRole() {
@@ -112,7 +103,12 @@ public class User {
         this.role = role;
     }
 
+    public Address getAddress() {
+        return address;
+    }
 
-
+    public void setAddress(Address address) {
+        this.address = address;
+    }
 
 }

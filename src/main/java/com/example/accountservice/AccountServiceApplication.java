@@ -24,21 +24,6 @@ import java.util.ArrayList;
 @EnableDiscoveryClient
 public class AccountServiceApplication {
 
-	@Autowired
-	private UserRepository repository;
-
-//	@Autowired
-//	private PasswordEncoder encoder;
-//	@PostConstruct
-//	public void initUsers(){
-//		ArrayList<User> users = new ArrayList<>();
-//		User user1 = new User("Vanio","Ivan","Marinchev","i.marinchev@gmail.com","12345678","customer");
-//		User user2 = new User("Bisle","Biser","Usufi","b.usufi@gmail.com","12345678","customer");
-//		user1.setPassword(encoder.encode(user1.getPassword()));
-//		user2.setPassword(encoder.encode(user2.getPassword()));
-//		repository.save(user1);
-//		repository.save(user2);
-//	}
 	public static void main(String[] args) {
 		SpringApplication.run(AccountServiceApplication.class, args);
 	}

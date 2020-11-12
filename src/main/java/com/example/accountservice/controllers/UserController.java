@@ -4,6 +4,7 @@ import com.example.accountservice.models.AuthRequest;
 import com.example.accountservice.models.User;
 import com.example.accountservice.repository.UserRepository;
 import com.example.accountservice.util.JwtUtil;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping("api/")
 public class UserController {
+
     @Autowired
     private UserRepository userRepository;
 
@@ -39,32 +41,27 @@ public class UserController {
     private PasswordEncoder encoder;
 
     public boolean isAdmin(String token) {
-        String username = jwtUtil.extractUsername(token.substring(7));
-        User user = userRepository.findByUsername(username);
+        String email = jwtUtil.extractEmail(token.substring(7));
+        User user = userRepository.findByEmail(email);
+        //System.out.println(jwtUtil.extractClaim(token, Claims::getSubject));
         return user.getRole().equals("ROLE_ADMIN") ? true : false;
     }
-
-
-    @GetMapping("/index")
-    public String index() {
-        return "Hello";
-    }
-
 
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers(@RequestHeader(name = "Authorization") String token) {
         List<User> users = new ArrayList<>();
+
         if(isAdmin(token)) {
             users = userRepository.findAll();
             return new ResponseEntity<>(users,HttpStatus.OK);
         }else{
-            return new ResponseEntity<>(users,HttpStatus.OK);
+            return new ResponseEntity<>(users,HttpStatus.FORBIDDEN);
         }
     }
 
 
     @PostMapping("/authenticate")
-    public String generateToken(@RequestBody AuthRequest request) throws Exception {
+    public ResponseEntity<?> generateToken(@RequestBody AuthRequest request) throws Exception {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
@@ -72,33 +69,33 @@ public class UserController {
         } catch (Exception exception) {
             throw new Exception("invalid");
         }
-        return jwtUtil.generateToken(request.getUsername());
+        return new ResponseEntity<>(jwtUtil.generateToken(request.getUsername()),HttpStatus.OK);
     }
 
     @PostMapping("/admin")
-    public ResponseEntity<String> authenticateAdmin(@RequestBody User user) {
-        User currentUser = userRepository.findByUsername(user.getUsername());
+    public ResponseEntity<?> authenticateAdmin(@RequestBody User user) {
+        User currentUser = userRepository.findByEmail(user.getEmail());
         if (currentUser != null && encoder.matches(user.getPassword(), currentUser.getPassword()) && currentUser.getRole().equals("ROLE_ADMIN")) {
             authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(currentUser.getUsername(), user.getPassword()));
-            return new ResponseEntity<>(jwtUtil.generateToken(currentUser.getUsername()),HttpStatus.OK);
+                    .authenticate(new UsernamePasswordAuthenticationToken(currentUser.getEmail(), user.getPassword()));
+            return new ResponseEntity<>(jwtUtil.generateToken(currentUser.getEmail()),HttpStatus.OK);
         } else {
 
-            return new ResponseEntity<>("Wrong credentials",HttpStatus.OK);
+            return new ResponseEntity<>("Wrong credentials",HttpStatus.UNAUTHORIZED);
         }
     }
 
     @PostMapping("/register")
-    public String register(@RequestBody User user) {
-        if (userRepository.findByUsername(user.getUsername()) == null) {
-            User newUser = new User(user.getUsername(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword());
+    public ResponseEntity<?> register(@RequestBody User user) {
+        if (userRepository.findByEmail(user.getEmail()) == null) {
+            User newUser = new User(user.getEmail(), user.getFirstName(), user.getLastName(), user.getPassword());
             newUser.setPassword(encoder.encode(newUser.getPassword()));
             newUser.setRole("ROLE_USER");
 
             userRepository.save(newUser);
-            return "Succesfully registered";
+            return new ResponseEntity<>("Successfully registered",HttpStatus.CREATED);
         } else {
-            return "Already registered";
+            return new ResponseEntity<>("Already registered",HttpStatus.CONFLICT);
         }
     }
 
@@ -108,8 +105,9 @@ public class UserController {
         User currentUser = userRepository.findByEmail(user.getEmail());
         if (currentUser != null && encoder.matches(user.getPassword(), currentUser.getPassword())) {
             authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(currentUser.getUsername(), user.getPassword()));
-            return jwtUtil.generateToken(currentUser.getUsername());
+                    .authenticate(new UsernamePasswordAuthenticationToken(currentUser.getEmail(), user.getPassword()));
+
+            return jwtUtil.generateToken(currentUser.getEmail());
 
         } else {
 
@@ -118,18 +116,18 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable long id, @RequestBody User user, @RequestHeader(name = "Authorization") String token) {
+    public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody User user, @RequestHeader(name = "Authorization") String token) {
         if (this.isAdmin(token)) {
             User modifiedUser = userRepository.findById(id).orElseThrow();
             modifiedUser.setEmail(user.getEmail());
-            modifiedUser.setUsername(user.getUsername());
+            //modifiedUser.setUsername(user.getUsername());
             modifiedUser.setFirstName(user.getFirstName());
             modifiedUser.setLastName(user.getLastName());
             modifiedUser.setPassword(encoder.encode(user.getPassword()));
             userRepository.save(modifiedUser);
             return new ResponseEntity<>("Successfully modified user", HttpStatus.OK);
         } else {
-            return new ResponseEntity<>("You are not an admin, so you cannot modify existing data", HttpStatus.OK);
+            return new ResponseEntity<>("You are not an admin, so you cannot modify existing data", HttpStatus.UNAUTHORIZED);
         }
     }
 }
