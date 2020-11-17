@@ -8,6 +8,7 @@ import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -43,47 +44,53 @@ public class UserController {
     public boolean isAdmin(String token) {
         String email = jwtUtil.extractEmail(token.substring(7));
         User user = userRepository.findByEmail(email);
-        //System.out.println(jwtUtil.extractClaim(token, Claims::getSubject));
         return user.getRole().equals("ROLE_ADMIN") ? true : false;
     }
 
-    @GetMapping("/users")
+    @GetMapping("/users/getAll")
     public ResponseEntity<List<User>> getAllUsers(@RequestHeader(name = "Authorization") String token) {
-        List<User> users = new ArrayList<>();
+        List<User> users;
+        users = userRepository.findAll();
+        return new ResponseEntity<>(users, HttpStatus.OK);
 
-        if(isAdmin(token)) {
-            users = userRepository.findAll();
-            return new ResponseEntity<>(users,HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>(users,HttpStatus.FORBIDDEN);
-        }
+    }
+
+    @GetMapping("/user/getByEmail/{email}")
+    public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
+        System.out.println(email);
+        User user;
+        user = userRepository.findByEmail(email);
+        return user != null ?
+                new ResponseEntity<User>(user, HttpStatus.OK) :
+                new ResponseEntity<String>("No such user", HttpStatus.NOT_FOUND);
+
     }
 
 
-    @PostMapping("/authenticate")
-    public ResponseEntity<?> generateToken(@RequestBody AuthRequest request) throws Exception {
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-            );
-        } catch (Exception exception) {
-            throw new Exception("invalid");
-        }
-        return new ResponseEntity<>(jwtUtil.generateToken(request.getUsername()),HttpStatus.OK);
-    }
+//    @PostMapping("/authenticate")
+//    public ResponseEntity<?> generateToken(@RequestBody AuthRequest request) throws Exception {
+//        try {
+//            authenticationManager.authenticate(
+//                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+//            );
+//        } catch (Exception exception) {
+//            throw new Exception("invalid");
+//        }
+//        return new ResponseEntity<>(jwtUtil.generateToken(request.getUsername()),HttpStatus.OK);
+//    }
 
-    @PostMapping("/admin")
-    public ResponseEntity<?> authenticateAdmin(@RequestBody User user) {
-        User currentUser = userRepository.findByEmail(user.getEmail());
-        if (currentUser != null && encoder.matches(user.getPassword(), currentUser.getPassword()) && currentUser.getRole().equals("ROLE_ADMIN")) {
-            authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(currentUser.getEmail(), user.getPassword()));
-            return new ResponseEntity<>(jwtUtil.generateToken(currentUser.getEmail()),HttpStatus.OK);
-        } else {
-
-            return new ResponseEntity<>("Wrong credentials",HttpStatus.UNAUTHORIZED);
-        }
-    }
+//    @PostMapping("/admin")
+//    public ResponseEntity<?> authenticateAdmin(@RequestBody User user) {
+//        User currentUser = userRepository.findByEmail(user.getEmail());
+//        if (currentUser != null && encoder.matches(user.getPassword(), currentUser.getPassword()) && currentUser.getRole().equals("ROLE_ADMIN")) {
+//            authenticationManager
+//                    .authenticate(new UsernamePasswordAuthenticationToken(currentUser.getEmail(), user.getPassword()));
+//            return new ResponseEntity<>(jwtUtil.generateToken(currentUser.getEmail()),HttpStatus.OK);
+//        } else {
+//
+//            return new ResponseEntity<>("Wrong credentials",HttpStatus.UNAUTHORIZED);
+//        }
+//    }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
@@ -93,9 +100,9 @@ public class UserController {
             newUser.setRole("ROLE_USER");
 
             userRepository.save(newUser);
-            return new ResponseEntity<>("Successfully registered",HttpStatus.CREATED);
+            return new ResponseEntity<>("Successfully registered", HttpStatus.CREATED);
         } else {
-            return new ResponseEntity<>("Already registered",HttpStatus.CONFLICT);
+            return new ResponseEntity<>("Already registered", HttpStatus.CONFLICT);
         }
     }
 

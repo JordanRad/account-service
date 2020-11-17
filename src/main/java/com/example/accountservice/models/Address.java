@@ -20,7 +20,7 @@ public class Address {
     @NotNull
     private String street;
 
-    private int houseNumber;
+    private String zipCode;
 
     public long getId() {
         return id;
@@ -54,19 +54,21 @@ public class Address {
         this.street = street;
     }
 
-    public int getHouseNumber() {
-        return houseNumber;
+    public String getZipCode() {
+        return zipCode;
     }
 
-    public void setHouseNumber(int houseNumber) {
-        this.houseNumber = houseNumber;
+    public void setZipCode(String zipCode) {
+        this.zipCode = zipCode;
     }
 
-    public Address(long id, String countryCode, String city, String street, int houseNumber) {
-        this.id = id;
+    public Address(){
+
+    }
+    public Address(String countryCode, String city, String street, String zipCode) {
         this.countryCode = countryCode;
         this.city = city;
         this.street = street;
-        this.houseNumber = houseNumber;
+        this.zipCode = zipCode;
     }
 }

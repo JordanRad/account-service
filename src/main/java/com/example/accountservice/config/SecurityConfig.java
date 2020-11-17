@@ -5,9 +5,11 @@ import com.example.accountservice.service.JwtUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -25,6 +27,7 @@ import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -68,7 +71,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable().cors().and()
                 .authorizeRequests()
-                .antMatchers("/api/authenticate", "/api/register","/api/admin","/api/login").permitAll()
+                //.antMatchers("/api/users/getAll").access("hasRole('ADMIN')")
+                //.antMatchers("/api/user/getByEmail/**","/api/authenticate", "/api/register","/api/admin","/api/login").permitAll()
+                .antMatchers("/**").permitAll()
                 .anyRequest()
                 .authenticated()
                 .and()

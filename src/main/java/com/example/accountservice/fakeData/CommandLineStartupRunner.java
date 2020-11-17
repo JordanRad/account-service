@@ -34,6 +34,7 @@ public class CommandLineStartupRunner implements CommandLineRunner {
         User userTwo = new User();
         userTwo.setEmail("ivan@gmail.com");
         userTwo.setPassword(encoder.encode("admin"));
+        userTwo.setRole("ROLE_USER");
 
         repository.save(userTwo);
         System.out.println(String.format("User with email: %s has just been added.",userTwo.getEmail()));
@@ -41,6 +42,7 @@ public class CommandLineStartupRunner implements CommandLineRunner {
         User userThree = new User();
         userThree.setEmail("b.u@gmail.com");
         userThree.setPassword(encoder.encode("admin"));
+        userThree.setRole("ROLE_USER");
 
         repository.save(userThree);
         System.out.println(String.format("User with email: %s has just been added.",userThree.getEmail()));

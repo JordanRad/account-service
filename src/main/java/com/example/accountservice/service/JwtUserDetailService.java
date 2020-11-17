@@ -19,13 +19,14 @@ public class JwtUserDetailService implements UserDetailsService {
     @Autowired
     private UserRepository repository;
 
+
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException
     {
        User user = repository.findByEmail(email);
 
-           return new org.springframework.security.core.userdetails.User (user.getEmail(), user.getPassword(), new ArrayList<>());
+           return new org.springframework.security.core.userdetails.User (user.getEmail(), user.getPassword(), user.getAuthorities());
 
     }
 
