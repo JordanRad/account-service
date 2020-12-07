@@ -36,9 +36,7 @@ public class User implements UserDetails {
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private Address address;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "paymentDetails_id", referencedColumnName = "id")
-    private PaymentDetails details;
+
 
 //    public String getUsername() {
 //        return username;
@@ -100,13 +98,6 @@ public class User implements UserDetails {
         return password;
     }
 
-    public PaymentDetails getDetails() {
-        return details;
-    }
-
-    public void setDetails(PaymentDetails details) {
-        this.details = details;
-    }
 
     @Override
     public String getUsername() {

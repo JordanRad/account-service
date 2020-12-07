@@ -1,5 +1,6 @@
 package com.example.accountservice.fakeData;
 
+import com.example.accountservice.models.Address;
 import com.example.accountservice.models.User;
 import com.example.accountservice.repository.UserRepository;
 import com.netflix.discovery.converters.Auto;
@@ -23,10 +24,19 @@ public class CommandLineStartupRunner implements CommandLineRunner {
 
         System.out.println("Initializing data.....");
 
+        Address address = new Address();
+        address.setCity("Sofia");
+        address.setZipCode("1307");
+        address.setCountryCode("NL");
+        address.setStreet("Kozyak 47");
+
         User userOne = new User();
         userOne.setEmail("JordanRad@gmail.com");
+        userOne.setFirstName("Jordan");
+        userOne.setLastName("Radushev");
         userOne.setPassword(encoder.encode("admin"));
         userOne.setRole("ROLE_ADMIN");
+        userOne.setAddress(address);
 
         repository.save(userOne);
         System.out.println(String.format("User with email: %s has just been added.",userOne.getEmail()));
@@ -35,6 +45,7 @@ public class CommandLineStartupRunner implements CommandLineRunner {
         userTwo.setEmail("ivan@gmail.com");
         userTwo.setPassword(encoder.encode("admin"));
         userTwo.setRole("ROLE_USER");
+        //userTwo.setAddress(address);
 
         repository.save(userTwo);
         System.out.println(String.format("User with email: %s has just been added.",userTwo.getEmail()));
@@ -43,6 +54,7 @@ public class CommandLineStartupRunner implements CommandLineRunner {
         userThree.setEmail("b.u@gmail.com");
         userThree.setPassword(encoder.encode("admin"));
         userThree.setRole("ROLE_USER");
+        //userThree.setAddress(address);
 
         repository.save(userThree);
         System.out.println(String.format("User with email: %s has just been added.",userThree.getEmail()));

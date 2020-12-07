@@ -1,26 +1,22 @@
 package com.example.accountservice.controllers;
 
-import com.example.accountservice.models.AuthRequest;
+import com.example.accountservice.models.Address;
 import com.example.accountservice.models.User;
+import com.example.accountservice.models.UserResponse;
 import com.example.accountservice.repository.UserRepository;
 import com.example.accountservice.util.JwtUtil;
-import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 
-import java.net.http.HttpHeaders;
-import java.util.ArrayList;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:3005")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("api/")
 public class UserController {
@@ -48,7 +44,7 @@ public class UserController {
     }
 
     @GetMapping("/users/getAll")
-    public ResponseEntity<List<User>> getAllUsers(@RequestHeader(name = "Authorization") String token) {
+    public ResponseEntity<List<User>> getAllUsers() {
         List<User> users;
         users = userRepository.findAll();
         return new ResponseEntity<>(users, HttpStatus.OK);
@@ -108,33 +104,55 @@ public class UserController {
 
 
     @PostMapping("/login")
-    public String login(@RequestBody User user) {
+    public ResponseEntity<?> login(@RequestBody User user) {
         User currentUser = userRepository.findByEmail(user.getEmail());
         if (currentUser != null && encoder.matches(user.getPassword(), currentUser.getPassword())) {
             authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(currentUser.getEmail(), user.getPassword()));
 
-            return jwtUtil.generateToken(currentUser.getEmail());
+            //return jwtUtil.generateToken(currentUser.getEmail());
 
+            UserResponse response = new UserResponse(jwtUtil.generateToken(currentUser.getEmail()), currentUser.getEmail(), currentUser.getAddress(), currentUser.getFirstName(), currentUser.getLastName(), currentUser.getId());
+
+            return new ResponseEntity(response, HttpStatus.OK);
         } else {
 
-            return "Wrong credentials";
+            return new ResponseEntity("Wrong credentials", HttpStatus.NOT_FOUND);
         }
     }
 
     @PutMapping("/users/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody User user, @RequestHeader(name = "Authorization") String token) {
-        if (this.isAdmin(token)) {
-            User modifiedUser = userRepository.findById(id).orElseThrow();
+    public ResponseEntity<?> updateUser(@PathVariable long id, @RequestBody User user) {
+        User modifiedUser = userRepository.findById(id).orElseThrow();
+
+        boolean sameEmailExists = true;
+        int res = userRepository.countUserWithSameEmail(user.getEmail());
+        sameEmailExists = res > 0;
+        if (modifiedUser.getEmail().equals(user.getEmail())) {
+            sameEmailExists = false;
+        }
+
+
+        if (!sameEmailExists) {
             modifiedUser.setEmail(user.getEmail());
             //modifiedUser.setUsername(user.getUsername());
             modifiedUser.setFirstName(user.getFirstName());
             modifiedUser.setLastName(user.getLastName());
-            modifiedUser.setPassword(encoder.encode(user.getPassword()));
-            userRepository.save(modifiedUser);
+            if (!user.getPassword().equals("Not changed")) {
+                modifiedUser.setPassword(encoder.encode(user.getPassword()));
+            }
+            Address address = user.getAddress();
+            System.out.println(modifiedUser.getAddress()!=null);
+            System.out.println(user.getAddress().getStreet());
+            if(user.getAddress()!=null) {
+                if (modifiedUser.getAddress() == null || modifiedUser.getAddress().equals(address.getStreet())) {
+                    modifiedUser.setAddress(address);
+                }
+            }
+            User updatedUser = userRepository.save(modifiedUser);
             return new ResponseEntity<>("Successfully modified user", HttpStatus.OK);
         } else {
-            return new ResponseEntity<>("You are not an admin, so you cannot modify existing data", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>("This email already exists in the database", HttpStatus.OK);
         }
     }
 }
