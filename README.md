@@ -8,8 +8,8 @@ Microservices E-commerce project consists of several microservices. Together the
 ```
 GET:  /api/users/getAll
 GET:  /api/user/getByEmail/{email}
-POST: /api/user/login/
-POST: /api/user/register/
-POST: /api/user/admin/
+POST: /api/login/
+POST: /api/register/
+POST: /api/admin/
 PUT: /api/user/{id}
 ```
