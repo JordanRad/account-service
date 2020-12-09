@@ -1,2 +1,15 @@
-# account-service
+# Account service
 Account service for my microservice project
+
+## Case
+Microservices E-commerce project consists of several microservices. Together they build an e-commerce distributed software system
+
+## API Endpoints
+```
+GET:  /api/users/getAll
+GET:  /api/user/getByEmail/{email}
+POST: /api/login/
+POST: /api/register/
+POST: /api/admin/
+PUT: /api/user/{id}
+```
