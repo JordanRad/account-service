@@ -113,8 +113,27 @@ public class UserController {
             //return jwtUtil.generateToken(currentUser.getEmail());
 
             UserResponse response = new UserResponse(jwtUtil.generateToken(currentUser.getEmail()), currentUser.getEmail(), currentUser.getAddress(), currentUser.getFirstName(), currentUser.getLastName(), currentUser.getId());
-
             return new ResponseEntity(response, HttpStatus.OK);
+        } else {
+
+            return new ResponseEntity("Wrong credentials", HttpStatus.NOT_FOUND);
+        }
+    }
+    @PostMapping("/admin")
+    public ResponseEntity<?> loginAdmin(@RequestBody User user) {
+        User currentUser = userRepository.findByEmail(user.getEmail());
+        if (currentUser != null && encoder.matches(user.getPassword(), currentUser.getPassword())) {
+            authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(currentUser.getEmail(), user.getPassword()));
+
+            if(currentUser.getRole().equals("ROLE_ADMIN")){
+            UserResponse response = new UserResponse(jwtUtil.generateToken(currentUser.getEmail()), currentUser.getEmail(), currentUser.getAddress(), currentUser.getFirstName(), currentUser.getLastName(), currentUser.getId());
+            return new ResponseEntity(response, HttpStatus.OK);
+            }else{
+
+                return new ResponseEntity("Wrong credentials", HttpStatus.NOT_FOUND);
+            }
+
         } else {
 
             return new ResponseEntity("Wrong credentials", HttpStatus.NOT_FOUND);

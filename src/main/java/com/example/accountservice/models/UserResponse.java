@@ -15,6 +15,8 @@ public class UserResponse {
 
     private String lastName;
 
+
+
     public UserResponse() {
     }
 
@@ -74,6 +76,7 @@ public class UserResponse {
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+
 }
 
 
