@@ -10,5 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Maven install
+        run: mvn clean install
       - name: Build with Maven
         run: mvn -B package --file pom.xml
