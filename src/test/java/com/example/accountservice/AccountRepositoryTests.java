@@ -110,7 +110,7 @@ public class AccountRepositoryTests {
         User u = repository.getOne(idOne);
         repository.delete(u);
         Assertions.assertThrows(NoSuchElementException.class, () -> {
-            var user = repository.findById(idOne).get();
+            User user = repository.findById(idOne).get();
         });
     }
 
