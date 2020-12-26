@@ -1,5 +1,6 @@
 package com.example.accountservice.models;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,7 +38,6 @@ public class User implements UserDetails {
     private Address address;
 
 
-
 //    public String getUsername() {
 //        return username;
 //    }
@@ -54,7 +54,7 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    public User(String email,String firstName, String lastName, String password) {
+    public User(String email, String firstName, String lastName, String password) {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -145,6 +145,7 @@ public class User implements UserDetails {
         this.address = address;
     }
 
+    @JsonDeserialize(using = com.example.proxygateway.service.CustomAuthorityDeserializer.class)
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> list = new ArrayList<GrantedAuthority>();
