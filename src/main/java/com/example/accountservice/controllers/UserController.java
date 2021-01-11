@@ -96,9 +96,9 @@ public class UserController {
             newUser.setRole("ROLE_USER");
 
             userRepository.save(newUser);
-            return new ResponseEntity<>("Successfully registered", HttpStatus.CREATED);
+            return new ResponseEntity<>("Successfully registered", HttpStatus.OK);
         } else {
-            return new ResponseEntity<>("Already registered", HttpStatus.CONFLICT);
+            return new ResponseEntity<>("Already registered", HttpStatus.OK);
         }
     }
 
