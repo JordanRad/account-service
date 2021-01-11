@@ -115,7 +115,7 @@ public class AccountMvcTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(toJsonString(user)))
                 .andDo(print())
-                .andExpect(status().isCreated());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -130,7 +130,8 @@ public class AccountMvcTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(toJsonString(user)))
                 .andDo(print())
-                .andExpect(status().isConflict());
+                .andExpect(status().isOk())
+        .andExpect(content().string("Already registered"));
     }
 
     @Test
