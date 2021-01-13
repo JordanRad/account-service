@@ -15,8 +15,6 @@ public class UserResponse {
 
     private String lastName;
 
-
-
     public UserResponse() {
     }
 

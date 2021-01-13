@@ -12,8 +12,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-
 import java.util.List;
 
 @CrossOrigin(origins = "*")
@@ -29,11 +27,7 @@ public class UserController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
-    //@Autowired
-    //private RestTemplate restTemplate;
 
-    // @Autowired
-    // private WebClient.Builder webClientBuilder;
     @Autowired
     private PasswordEncoder encoder;
 
@@ -61,32 +55,6 @@ public class UserController {
                 new ResponseEntity<String>("No such user", HttpStatus.NOT_FOUND);
 
     }
-
-
-//    @PostMapping("/authenticate")
-//    public ResponseEntity<?> generateToken(@RequestBody AuthRequest request) throws Exception {
-//        try {
-//            authenticationManager.authenticate(
-//                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-//            );
-//        } catch (Exception exception) {
-//            throw new Exception("invalid");
-//        }
-//        return new ResponseEntity<>(jwtUtil.generateToken(request.getUsername()),HttpStatus.OK);
-//    }
-
-//    @PostMapping("/admin")
-//    public ResponseEntity<?> authenticateAdmin(@RequestBody User user) {
-//        User currentUser = userRepository.findByEmail(user.getEmail());
-//        if (currentUser != null && encoder.matches(user.getPassword(), currentUser.getPassword()) && currentUser.getRole().equals("ROLE_ADMIN")) {
-//            authenticationManager
-//                    .authenticate(new UsernamePasswordAuthenticationToken(currentUser.getEmail(), user.getPassword()));
-//            return new ResponseEntity<>(jwtUtil.generateToken(currentUser.getEmail()),HttpStatus.OK);
-//        } else {
-//
-//            return new ResponseEntity<>("Wrong credentials",HttpStatus.UNAUTHORIZED);
-//        }
-//    }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
@@ -151,10 +119,8 @@ public class UserController {
             sameEmailExists = false;
         }
 
-
         if (!sameEmailExists) {
             modifiedUser.setEmail(user.getEmail());
-            //modifiedUser.setUsername(user.getUsername());
             modifiedUser.setFirstName(user.getFirstName());
             modifiedUser.setLastName(user.getLastName());
             if (!user.getPassword().equals("Not changed")) {
