@@ -51,7 +51,7 @@ public class AccountMvcTests {
         address.setStreet("Kozyak 47");
 
         User userOne = new User();
-        userOne.setEmail("JordanRad@gmail.com");
+        userOne.setEmail("test@gmail.com");
         userOne.setFirstName("Jordan");
         userOne.setLastName("Radushev");
         userOne.setPassword("admin");
@@ -78,7 +78,7 @@ public class AccountMvcTests {
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].firstName", is("Jordan")))
                 .andExpect(jsonPath("$[0].lastName", is("Radushev")))
-                .andExpect(jsonPath("$[0].email", is("JordanRad@gmail.com")))
+                .andExpect(jsonPath("$[0].email", is("test@gmail.com")))
                 .andExpect(jsonPath("$[0].role", is("ROLE_ADMIN")));
     }
     @Test
@@ -117,7 +117,7 @@ public class AccountMvcTests {
     @Test
     public void Should_Not_Create_New_User_And_Return_Status_409()throws Exception{
         User user = new User();
-        user.setEmail("JordanRad@gmail.com");
+        user.setEmail("test@gmail.com");
         user.setFirstName("User");
         user.setLastName("User");
         user.setPassword("user");
